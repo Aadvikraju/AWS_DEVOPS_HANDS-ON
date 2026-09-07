@@ -1,0 +1,179 @@
+Q1. What is AWS IAM?
+
+Answer:
+
+AWS IAM stands for Identity and Access Management. 
+It is an AWS service used to securely manage identities and control access to AWS resources. 
+IAM provides authentication and authorization capabilities using users, groups, roles, and policies.
+
+Q2. What are the main components of IAM?
+
+Answer:
+
+The main components are Users, Groups, Roles, and Policies. 
+Users represent identities, groups organize users, 
+policies define permissions, and roles provide temporary permissions that can be assumed by users, applications, or AWS services.
+
+Q3. What is an IAM User?
+
+Answer:
+
+An IAM user represents a person or application that needs access to AWS resources. Permissions can be assigned directly to the user or inherited through groups.
+
+Q4. What is an IAM Group?
+
+Answer:
+
+An IAM group is a collection of IAM users. 
+We can attach policies to a group, and the users in the group inherit those permissions. 
+Groups make permission management easier when managing multiple users.
+
+Q5. What is an IAM Policy?
+
+Answer:
+
+An IAM policy is a JSON document that defines which actions are allowed or denied on which AWS resources.
+
+Q6. What is an IAM Role?
+
+Answer:
+
+An IAM role is an identity that provides temporary credentials and can be assumed by users, applications, or AWS services. 
+Roles are commonly used with services such as EC2 so we don't have to store long-term access keys.
+
+Q7. IAM User vs IAM Role?
+
+Answer:
+
+An IAM user represents a permanent identity and can have long-term credentials. 
+An IAM role provides temporary credentials and is commonly used by AWS services, applications, and users that need to assume a specific set of permissions.
+
+Q8. IAM Group vs IAM Policy?
+
+Answer:
+
+An IAM group is a collection of users, while an IAM policy defines permissions. 
+Policies can be attached to groups so that all users in the group receive those permissions.
+
+Q9. Why should we use IAM Roles with EC2?
+
+Answer:
+
+We use IAM roles with EC2 so the instance can obtain temporary credentials to access AWS services without storing Access Keys and Secret Keys on the server.
+
+Q10. What is least privilege?
+
+Answer:
+
+Least privilege means giving a user, application, or service only the minimum permissions required to perform its task.
+
+Example:
+
+Developer
+    ↓
+Reboot EC2
+    ✅
+
+Launch EC2
+    ❌
+
+Terminate EC2
+    ❌
+Q11. What happens when there is an Explicit Deny?
+
+Answer:
+
+An Explicit Deny overrides an Allow. Even if another policy allows an action, an applicable explicit Deny causes the request to be denied.
+
+Q12. What is the default IAM behavior?
+
+Answer:
+
+AWS follows a default-deny model. A request is denied unless an applicable policy allows the requested action. An explicit Deny always overrides an Allow.
+
+Q13. AWS Managed Policy vs Customer Managed Policy?
+
+Answer:
+
+AWS Managed Policies are created and maintained by AWS. Customer Managed Policies are created and managed by us according to our organization's requirements.
+
+Q14. What is an Inline Policy?
+
+Answer:
+
+An inline policy is directly embedded into a specific user, group, or role. It has a one-to-one relationship with that identity.
+
+Q15. What is STS?
+
+Answer:
+
+AWS Security Token Service provides temporary security credentials that can be used to access AWS resources.
+
+Q16. How can you verify the AWS identity from EC2?
+aws sts get-caller-identity
+Q17. Why shouldn't we store AWS Access Keys inside EC2?
+
+Answer:
+
+Access Keys are long-term credentials and can be accidentally exposed. IAM roles provide temporary credentials and remove the need to hard-code credentials on the server.
+
+Q18. An EC2 instance can list S3 buckets but cannot upload an object. Why?
+
+Answer:
+
+The IAM role probably allows s3:ListBucket or read permissions but does not allow s3:PutObject. I would verify the policy and add only the required s3:PutObject permission.
+
+Q19. An IAM policy allows s3:GetObject, but the request still returns AccessDenied. What do you check?
+
+Answer:
+
+I would check the resource ARN, bucket policy, explicit Deny, permissions boundary, Organizations SCP, KMS permissions if encryption is involved, and whether the correct bucket, object path, and AWS account are being accessed.
+
+Q20. Give an example of an IAM issue you faced.
+Your real hands-on answer:
+
+I created IAM users and groups and assigned the appropriate permissions. I attached AmazonEC2ReadOnlyAccess to a practice user. When I logged in using that user and tried to launch an EC2 instance, I received an AccessDenied error for ec2:CreateSecurityGroup. I analyzed the error and understood that the user only had read-only EC2 permissions, so the required create permission was missing. This helped me understand IAM policy evaluation and the principle of least privilege.
+
+This is particularly valuable because it's your actual lab experience, not a theoretical answer.
+
+🔥 Scenario-Based IAM Questions
+
+Create:
+
+01-IAM/scenario-based-questions.md
+
+Put these in it.
+
+Scenario 1
+
+A developer can view EC2 but cannot launch it.
+
+What do you check?
+
+Answer:
+
+Check whether the user or group has the required EC2 create permissions such as ec2:RunInstances and any related permissions required by the launch operation.
+
+Scenario 2
+
+An EC2 application needs S3 access but there must be no credentials stored on the server.
+
+Solution?
+
+Attach an IAM role to the EC2 instance and provide only the required S3 permissions.
+
+Scenario 3
+
+IAM policy allows ec2:TerminateInstances, but termination is still denied.
+
+What do you check?
+
+Check for explicit Deny, permissions boundary, SCP, resource policies where relevant, and other applicable policy controls.
+
+Scenario 4
+
+A developer needs only to reboot EC2 instances.
+
+Solution?
+
+Create a custom least-privilege policy allowing ec2:DescribeInstances and ec2:RebootInstances, without granting ec2:RunInstances or ec2:TerminateInstances.
