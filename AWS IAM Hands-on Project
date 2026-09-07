@@ -1,0 +1,198 @@
+# AWS IAM Hands-on Practice
+
+## Objective
+
+Understand and practice AWS Identity and Access Management (IAM).
+
+## IAM Components
+
+- IAM Users
+- IAM Groups
+- IAM Policies
+- IAM Roles
+- Permissions
+- Explicit Deny
+- Least Privilege
+- IAM Policy Evaluation
+- EC2 IAM Roles
+- S3 Access using IAM Roles
+- IAM Troubleshooting
+
+---
+
+# Lab 1: IAM User
+
+I have Created the following practice users:
+
+- developer1
+- developer2
+- devops1
+
+## Purpose
+
+IAM users represent identities that need access to AWS resources.
+
+---
+
+# Lab 2: IAM Groups
+
+Created:
+
+- Developers
+- DevOps-Team
+- ReadOnly-Team
+
+Example:
+
+developer1
+    ↓
+Developers
+    ↓
+AmazonEC2ReadOnlyAccess
+
+---
+
+# Lab 3: IAM Managed Policy
+
+Attached:
+
+AmazonEC2ReadOnlyAccess
+
+Purpose:
+
+Allow users to view EC2 resources without allowing them to create or terminate instances.
+
+---
+
+# Lab 4: Custom IAM Policy
+
+Created:
+
+List-S3-Buckets-Policy
+
+Purpose:
+
+Allow listing S3 buckets.
+
+---
+
+# Lab 5: IAM Role
+
+Created:
+
+EC2-S3-ReadOnly-Role
+
+Trusted service:
+
+EC2
+
+Purpose:
+
+Allow an EC2 instance to access S3 without storing AWS access keys on the server.
+
+---
+
+# Lab 6: ReadOnly Access Test
+
+Logged in using an IAM user with EC2 read-only permissions.
+
+### Test
+
+View EC2 instances:
+
+SUCCESS
+
+Launch EC2:
+
+FAILED
+
+AWS returned an AccessDenied error because the user did not have the required create permissions.
+
+Example denied action:
+
+ec2:CreateSecurityGroup
+
+### Learning
+
+Read-only permissions allow viewing resources but do not allow resource creation or modification.
+
+---
+
+# Lab 7: Least Privilege
+
+Instead of giving AdministratorAccess, give only the permissions required for the task.
+
+Example:
+
+Developer needs to restart EC2:
+
+Allow:
+
+ec2:DescribeInstances
+ec2:RebootInstances
+
+Do not allow:
+
+ec2:RunInstances
+ec2:TerminateInstances
+
+---
+
+# Lab 8: Explicit Deny
+
+If one policy allows:
+
+ec2:TerminateInstances
+
+but another policy explicitly denies:
+
+ec2:TerminateInstances
+
+the request is denied.
+
+Explicit Deny always overrides Allow.
+
+---
+
+# Lab 9: EC2 + IAM Role + S3
+
+Architecture:
+
+EC2
+ ↓
+IAM Role
+ ↓
+S3 Policy
+ ↓
+Temporary Credentials
+ ↓
+S3
+
+The EC2 instance does not need a long-term AWS Access Key and Secret Key stored locally.
+
+---
+
+# Lab 10: IAM Troubleshooting
+
+When AccessDenied occurs, check:
+
+1. IAM Role/User
+2. Attached policies
+3. Required action
+4. Resource ARN
+5. Explicit Deny
+6. S3 Bucket Policy
+7. Permissions Boundary
+8. AWS Organizations SCP
+9. KMS permissions if applicable
+10. Correct AWS account/resource
+
+---
+
+# Key IAM Rules
+
+1. AWS uses a default-deny model.
+2. An Allow is required for the requested action.
+3. Explicit Deny overrides Allow.
+4. Follow least privilege.
+5. Prefer IAM Roles for AWS workloads instead of long-term access keys.
